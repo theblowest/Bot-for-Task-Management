@@ -1,0 +1,81 @@
+DEBUG    [2023-12-29 17:24:46,786] This is a debug message
+INFO     [2023-12-29 17:24:46,787] This is an info message
+WARNING  [2023-12-29 17:24:46,787] This is a warning
+ERROR    [2023-12-29 17:24:46,787] This is an error message
+CRITICAL [2023-12-29 17:24:46,787] FATAL!!!
+DEBUG    [2023-12-29 17:24:47,198] Starting new HTTPS connection (1): api.telegram.org:443
+DEBUG    [2023-12-29 17:24:47,362] https://api.telegram.org:443 "GET /bot6810282272:AAFUIAzV9cYREh9IkC1ZjfhoEjDtwT2Wdmo/getMe HTTP/1.1" 200 219
+DEBUG    [2023-12-29 17:24:47,365] Starting new HTTPS connection (1): api.telegram.org:443
+DEBUG    [2023-12-29 17:24:51,217] This is a debug message
+INFO     [2023-12-29 17:24:51,217] This is an info message
+WARNING  [2023-12-29 17:24:51,217] This is a warning
+ERROR    [2023-12-29 17:24:51,217] This is an error message
+CRITICAL [2023-12-29 17:24:51,217] FATAL!!!
+DEBUG    [2023-12-29 17:24:51,668] Starting new HTTPS connection (1): api.telegram.org:443
+DEBUG    [2023-12-29 17:24:51,834] https://api.telegram.org:443 "GET /bot6810282272:AAFUIAzV9cYREh9IkC1ZjfhoEjDtwT2Wdmo/getMe HTTP/1.1" 200 219
+DEBUG    [2023-12-29 17:24:51,837] Starting new HTTPS connection (1): api.telegram.org:443
+DEBUG    [2023-12-29 17:24:53,540] https://api.telegram.org:443 "GET /bot6810282272:AAFUIAzV9cYREh9IkC1ZjfhoEjDtwT2Wdmo/getUpdates?offset=1&timeout=20 HTTP/1.1" 200 354
+DEBUG    [2023-12-29 17:25:35,711] This is a debug message
+INFO     [2023-12-29 17:25:35,711] This is an info message
+WARNING  [2023-12-29 17:25:35,711] This is a warning
+ERROR    [2023-12-29 17:25:35,712] This is an error message
+CRITICAL [2023-12-29 17:25:35,712] FATAL!!!
+DEBUG    [2023-12-29 17:25:36,114] Starting new HTTPS connection (1): api.telegram.org:443
+DEBUG    [2023-12-29 17:25:36,291] https://api.telegram.org:443 "GET /bot6810282272:AAFUIAzV9cYREh9IkC1ZjfhoEjDtwT2Wdmo/getMe HTTP/1.1" 200 219
+DEBUG    [2023-12-29 17:25:36,294] Starting new HTTPS connection (1): api.telegram.org:443
+DEBUG    [2023-12-29 17:25:41,162] https://api.telegram.org:443 "GET /bot6810282272:AAFUIAzV9cYREh9IkC1ZjfhoEjDtwT2Wdmo/getUpdates?offset=1&timeout=20 HTTP/1.1" 200 354
+DEBUG    [2023-12-29 17:34:10,154] This is a debug message
+INFO     [2023-12-29 17:34:10,154] This is an info message
+WARNING  [2023-12-29 17:34:10,154] This is a warning
+ERROR    [2023-12-29 17:34:10,154] This is an error message
+CRITICAL [2023-12-29 17:34:10,154] FATAL!!!
+DEBUG    [2023-12-29 17:34:37,995] This is a debug message
+INFO     [2023-12-29 17:34:37,996] This is an info message
+WARNING  [2023-12-29 17:34:37,996] This is a warning
+ERROR    [2023-12-29 17:34:37,996] This is an error message
+CRITICAL [2023-12-29 17:34:37,996] FATAL!!!
+DEBUG    [2023-12-29 17:36:04,545] This is a debug message
+INFO     [2023-12-29 17:36:04,545] This is an info message
+WARNING  [2023-12-29 17:36:04,545] This is a warning
+ERROR    [2023-12-29 17:36:04,545] This is an error message
+CRITICAL [2023-12-29 17:36:04,545] FATAL!!!
+DEBUG    [2023-12-29 17:36:04,940] Starting new HTTPS connection (1): api.telegram.org:443
+DEBUG    [2023-12-29 17:36:05,114] https://api.telegram.org:443 "GET /bot6810282272:AAFUIAzV9cYREh9IkC1ZjfhoEjDtwT2Wdmo/getMe HTTP/1.1" 200 219
+DEBUG    [2023-12-29 17:36:05,117] Starting new HTTPS connection (1): api.telegram.org:443
+DEBUG    [2023-12-29 17:36:07,763] https://api.telegram.org:443 "GET /bot6810282272:AAFUIAzV9cYREh9IkC1ZjfhoEjDtwT2Wdmo/getUpdates?offset=1&timeout=20 HTTP/1.1" 200 354
+DEBUG    [2023-12-29 17:36:25,704] This is a debug message
+INFO     [2023-12-29 17:36:25,704] This is an info message
+WARNING  [2023-12-29 17:36:25,704] This is a warning
+ERROR    [2023-12-29 17:36:25,704] This is an error message
+CRITICAL [2023-12-29 17:36:25,705] FATAL!!!
+DEBUG    [2023-12-29 17:36:26,123] Starting new HTTPS connection (1): api.telegram.org:443
+DEBUG    [2023-12-29 17:36:26,307] https://api.telegram.org:443 "GET /bot6810282272:AAFUIAzV9cYREh9IkC1ZjfhoEjDtwT2Wdmo/getMe HTTP/1.1" 200 219
+DEBUG    [2023-12-29 17:36:26,310] Starting new HTTPS connection (1): api.telegram.org:443
+DEBUG    [2023-12-29 17:36:28,703] https://api.telegram.org:443 "GET /bot6810282272:AAFUIAzV9cYREh9IkC1ZjfhoEjDtwT2Wdmo/getUpdates?offset=1&timeout=20 HTTP/1.1" 200 354
+DEBUG    [2023-12-29 17:37:23,622] This is a debug message
+INFO     [2023-12-29 17:37:23,622] This is an info message
+WARNING  [2023-12-29 17:37:23,622] This is a warning
+ERROR    [2023-12-29 17:37:23,622] This is an error message
+CRITICAL [2023-12-29 17:37:23,622] FATAL!!!
+DEBUG    [2023-12-29 17:37:24,056] Starting new HTTPS connection (1): api.telegram.org:443
+DEBUG    [2023-12-29 17:37:24,230] https://api.telegram.org:443 "GET /bot6810282272:AAFUIAzV9cYREh9IkC1ZjfhoEjDtwT2Wdmo/getMe HTTP/1.1" 200 219
+DEBUG    [2023-12-29 17:37:24,233] Starting new HTTPS connection (1): api.telegram.org:443
+DEBUG    [2023-12-29 17:37:24,805] https://api.telegram.org:443 "GET /bot6810282272:AAFUIAzV9cYREh9IkC1ZjfhoEjDtwT2Wdmo/getUpdates?offset=1&timeout=20 HTTP/1.1" 200 354
+DEBUG    [2023-12-29 17:39:40,388] This is a debug message
+INFO     [2023-12-29 17:39:40,388] This is an info message
+WARNING  [2023-12-29 17:39:40,388] This is a warning
+ERROR    [2023-12-29 17:39:40,388] This is an error message
+CRITICAL [2023-12-29 17:39:40,388] FATAL!!!
+DEBUG    [2023-12-29 17:39:40,835] Starting new HTTPS connection (1): api.telegram.org:443
+DEBUG    [2023-12-29 17:39:41,008] https://api.telegram.org:443 "GET /bot6810282272:AAFUIAzV9cYREh9IkC1ZjfhoEjDtwT2Wdmo/getMe HTTP/1.1" 200 219
+DEBUG    [2023-12-29 17:39:41,011] Starting new HTTPS connection (1): api.telegram.org:443
+DEBUG    [2023-12-29 17:39:42,289] https://api.telegram.org:443 "GET /bot6810282272:AAFUIAzV9cYREh9IkC1ZjfhoEjDtwT2Wdmo/getUpdates?offset=1&timeout=20 HTTP/1.1" 200 354
+DEBUG    [2023-12-29 17:40:00,922] This is a debug message
+INFO     [2023-12-29 17:40:00,922] This is an info message
+WARNING  [2023-12-29 17:40:00,922] This is a warning
+ERROR    [2023-12-29 17:40:00,922] This is an error message
+CRITICAL [2023-12-29 17:40:00,922] FATAL!!!
+DEBUG    [2023-12-29 17:40:01,370] Starting new HTTPS connection (1): api.telegram.org:443
+DEBUG    [2023-12-29 17:40:01,554] https://api.telegram.org:443 "GET /bot6810282272:AAFUIAzV9cYREh9IkC1ZjfhoEjDtwT2Wdmo/getMe HTTP/1.1" 200 219
+DEBUG    [2023-12-29 17:40:01,557] Starting new HTTPS connection (1): api.telegram.org:443
+DEBUG    [2023-12-29 17:40:02,548] https://api.telegram.org:443 "GET /bot6810282272:AAFUIAzV9cYREh9IkC1ZjfhoEjDtwT2Wdmo/getUpdates?offset=1&timeout=20 HTTP/1.1" 200 354

@@ -1,22 +1,28 @@
 import sys
-
-import telebot
 from telebot import types
+from bot.models import User, Session as db_session
+from bot.config import TOKEN
+from telebot import TeleBot
 
-bot = telebot.TeleBot('6810282272:AAFUIAzV9cYREh9IkC1ZjfhoEjDtwT2Wdmo')
+bot = TeleBot(TOKEN)
 
 @bot.message_handler(commands=['start'])
 def start(message):
     # Обработка команды /start
     user_id = message.from_user.id
     user_name = message.from_user.username
+    session = db_session()
+    user = session.query(User).filter_by(username=user_id).first()
+    if not user:
+        user = User(username=user_id)
+        session.add(user)
+        session.commit()
 
     # Отправка приветственного сообщения
-    welcome_message = f"Привет, {user_name}! Бот успешно запущен."
+    welcome_message = f"Привет, {user_name}!"
     bot.send_message(user_id, welcome_message)
 
-
-@bot.message_handler(commands=['inform'])
+@bot.message_handler(commands=['info'])
 def info(message):
     markup = types.InlineKeyboardMarkup(row_width=1)
     phone_book = types.InlineKeyboardButton(
@@ -30,16 +36,12 @@ def info(message):
     )
     markup.add(phone_book, add_reminder, check_active_rem)
 
-    file = open('inform', 'r', encoding='utf-8')
+    file = open('../../static/inform', 'r', encoding='utf-8')
     txt = file.read()
 
     bot.send_message(message.chat.id, txt, reply_markup=markup)
 
 @bot.message_handler(commands=['stop'])
 def stop(message):
-    bot.send_message(message.chat.id, "Бот завершает выполнение.")
+    bot.send_message(message.chat.id, "Бот завершил работу.")
     sys.exit() | bot.stop_bot()
-
-
-if __name__ == "__main__":
-    bot.polling(none_stop=True)
