@@ -1,3 +1,3 @@
 TOKEN = '6810282272:AAFUIAzV9cYREh9IkC1ZjfhoEjDtwT2Wdmo'
 DEBUG = True
-SQLALCHEMY_DATABASE_URI = "sqlite:///bot.db:"
+SQLALCHEMY_DATABASE_URI = 'sqlite:///bot.db'
