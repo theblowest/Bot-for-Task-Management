@@ -10,6 +10,7 @@ from telebot.types import InlineKeyboardMarkup, InlineKeyboardButton
 from bot.config import TOKEN
 from models import User, Contact, engine, Event
 
+
 # Підключення до бази даних
 Session = sessionmaker(bind=engine)
 session = Session()
@@ -45,7 +46,9 @@ def handle_start(message):
         file = open('static/menu', 'r', encoding='utf-8')
         txt = file.read()
 
-        bot.send_message(message.chat.id, txt, reply_markup=markup)
+        with open('static/logo.png', 'rb') as photo:
+            bot.send_photo(message.chat.id, photo, txt, reply_markup=markup)
+
         global_context[chat_id] = 'menu'
 
 @bot.message_handler(commands=['help'])
@@ -426,7 +429,7 @@ def events_callback(call):
             elif call.data == 'menu':
                 global_context[chat_id] = 'menu'
         else:
-            bot.send_message(chat_id, "Непередбачений стан. Почніть з команди /events.")
+            bot.send_message(chat_id , "Непередбачений стан. Почніть з команди /events.")
     else:
         bot.send_message(chat_id, "Ви не авторизовані. Будь ласка, введіть логін.")
 
