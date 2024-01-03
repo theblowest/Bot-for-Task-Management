@@ -14,7 +14,7 @@ class User(Base):
     username = Column(String)
 
     contacts = relationship('Contact', secondary='user_contact')
-    events = relationship('Event', back_populates='user')
+    events = relationship('User', secondary='user_events', back_populates='events')
 
 
 # Модель контакту
@@ -25,10 +25,9 @@ class Contact(Base):
     phone_number = Column(String)
 
 # Таблиця для зв'язку багато-до-багатьох
-user_contact = Table('user_contact', Base.metadata,
-    Column('user_id', ForeignKey('users.id'), primary_key=True),
-    Column('contact_id', ForeignKey('contacts.id'), primary_key=True)
-)
+    user_contact = Table('user_contact', Base.metadata,
+                         Column('user_id', ForeignKey('users.id'), primary_key=True),
+                         Column('contact_id', ForeignKey('contacts.id'), primary_key=True))
 
 # Модель події (напоминання)
 class Event(Base):
@@ -43,10 +42,10 @@ class Event(Base):
 
 
 # Таблиця для зв'язку багато-до-багатьох для подій
-user_events = Table('user_events', Base.metadata,
-    Column('user_id', ForeignKey('users.id'), primary_key=True),
-    Column('event_id', ForeignKey('events.id'), primary_key=True)
-)
+    user_events = Table('user_events', Base.metadata,
+                        Column('user_id', ForeignKey('users.id'), primary_key=True),
+                        Column('event_id', ForeignKey('events.id'), primary_key=True))
+
 
 engine = create_engine('sqlite:///bot.db')
 Base.metadata.create_all(engine)

@@ -8,7 +8,6 @@ from telebot.async_telebot import AsyncTeleBot
 from telebot.types import InlineKeyboardMarkup, InlineKeyboardButton
 
 from bot.config import TOKEN
-from bot.handlers import info
 from models import User, Contact, engine, Event
 
 # Підключення до бази даних
@@ -48,6 +47,17 @@ def handle_start(message):
 
         bot.send_message(message.chat.id, txt, reply_markup=markup)
         global_context[chat_id] = 'menu'
+
+@bot.message_handler(commands=['help'])
+def help(message):
+    chat_id = message.chat.id
+    user = session.query(User).filter_by(chat_id=chat_id).first()
+    if user:
+        file = open('static/help', 'r', encoding='utf-8')
+        mess = file.read()
+
+        bot.send_message(message.chat.id, mess)
+        global_context[chat_id] = 'help'
 
 @bot.callback_query_handler(func=lambda call: call.data in {'phone_book', 'reminders'})
 def phonebook_callback(call):
@@ -419,6 +429,13 @@ def events_callback(call):
             bot.send_message(chat_id, "Непередбачений стан. Почніть з команди /events.")
     else:
         bot.send_message(chat_id, "Ви не авторизовані. Будь ласка, введіть логін.")
+
+
+# Обробник не визначених команд
+@bot.message_handler(func=lambda message: True, content_types=[])
+def handle_unknown(message):
+    bot.send_message(message.chat.id, "Я не розумію цю команду. Спробуйте ще раз або скористайтеся іншими командами.")
+
 
 # Обробник введення логіну
 @bot.message_handler(func=lambda message: True)
