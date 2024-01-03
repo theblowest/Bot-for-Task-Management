@@ -14,7 +14,7 @@ class User(Base):
     username = Column(String)
 
     contacts = relationship('Contact', secondary='user_contact')
-    events = relationship('User', secondary='user_events', back_populates='events')
+    events = relationship('Event', secondary='user_events', back_populates='user')
 
 
 # Модель контакту
@@ -28,6 +28,7 @@ class Contact(Base):
     user_contact = Table('user_contact', Base.metadata,
                          Column('user_id', ForeignKey('users.id'), primary_key=True),
                          Column('contact_id', ForeignKey('contacts.id'), primary_key=True))
+
 
 # Модель події (напоминання)
 class Event(Base):
