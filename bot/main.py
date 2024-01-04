@@ -29,7 +29,7 @@ def handle_start(message):
     user = session.query(User).filter_by(chat_id=message.chat.id).first()
     chat_id = message.chat.id
     if not user:
-        bot.send_message(message.chat.id, "Вас не зареєстровано. Будь ласка, введіть логін.")
+        bot.send_message(message.chat.id, "Вас не зареєстровано. Будь ласка, зареєструйтеся або введіть ваш логін.")
     else:
         if message == 'start':
             bot.send_message(message.chat.id, f"Привіт, {user.username}!")
@@ -476,7 +476,7 @@ def events_callback(call):
 
 
 # Обробник не визначених команд
-@bot.message_handler(func=lambda message: True)
+@bot.message_handler(func=lambda message: True, content_types=[])
 def handle_unknown(message):
     markup = types.InlineKeyboardMarkup(row_width=1)
     help_hand = types.InlineKeyboardButton(
@@ -503,6 +503,7 @@ def handle_login(message):
         session.add(user)
         session.commit()
         bot.send_message(chat_id, f"Ви зареєстровані, {user.username}!")
+        handle_start(message)
     else:
         # Авторизація
         if message.text == user.username:
