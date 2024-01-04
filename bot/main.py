@@ -3,8 +3,7 @@ from datetime import datetime
 import telebot
 from telebot import types
 from sqlalchemy.orm import sessionmaker
-import asyncio
-from telebot.async_telebot import AsyncTeleBot
+
 from telebot.types import InlineKeyboardMarkup, InlineKeyboardButton
 
 from bot.config import TOKEN
@@ -25,14 +24,15 @@ global_context = {}
 # Команда /start
 @bot.message_handler(commands=['start', 'menu'])
 def handle_start(message):
-    print('BOT STARTED')
+    print('+user')
     # Перевірка, чи користувач вже зареєстрований
     user = session.query(User).filter_by(chat_id=message.chat.id).first()
     chat_id = message.chat.id
     if not user:
         bot.send_message(message.chat.id, "Вас не зареєстровано. Будь ласка, введіть логін.")
     else:
-        bot.send_message(message.chat.id, f"Привіт, {user.username}!")
+        if message == 'start':
+            bot.send_message(message.chat.id, f"Привіт, {user.username}!")
         markup = types.InlineKeyboardMarkup(row_width=1)
         phone_book = types.InlineKeyboardButton(
             'Ваша телефонная книга', callback_data='phone_book', switch_inline_query=True
@@ -40,8 +40,11 @@ def handle_start(message):
         add_reminder = types.InlineKeyboardButton(
             'Напоминания', callback_data='reminders', switch_inline_query=True
         )
+        help_hand = types.InlineKeyboardButton(
+            'Help', callback_data='help', switch_inline_query=True
+        )
 
-        markup.add(phone_book, add_reminder)
+        markup.add(phone_book, add_reminder, help_hand)
 
         file = open('static/menu', 'r', encoding='utf-8')
         txt = file.read()
@@ -50,6 +53,29 @@ def handle_start(message):
             bot.send_photo(message.chat.id, photo, txt, reply_markup=markup)
 
         global_context[chat_id] = 'menu'
+
+@bot.message_handler(commands=['stop'])
+def stop(call):
+    chat_id = call.chat.id
+    user = session.query(User).filter_by(chat_id=chat_id).first()
+
+    if user:
+        markup = types.InlineKeyboardMarkup(row_width=1)
+        start = types.InlineKeyboardButton(
+            'Start', callback_data='start', switch_inline_query=True
+        )
+        markup.add(start)
+        bot.send_message(chat_id, "Бот завершил работу.", reply_markup=markup)
+
+@bot.callback_query_handler(func=lambda call: call.data in {'start'})
+def start_callback(call):
+    chat_id = call.message.chat.id
+    user = session.query(User).filter_by(chat_id=chat_id).first()
+
+    if user:
+        if call.data == "start":
+            handle_start(call.message)
+            global_context[chat_id] = 'start'
 
 @bot.message_handler(commands=['help'])
 def help(message):
@@ -62,7 +88,7 @@ def help(message):
         bot.send_message(message.chat.id, mess)
         global_context[chat_id] = 'help'
 
-@bot.callback_query_handler(func=lambda call: call.data in {'phone_book', 'reminders'})
+@bot.callback_query_handler(func=lambda call: call.data in {'phone_book', 'reminders', 'menu', 'help'})
 def phonebook_callback(call):
     chat_id = call.message.chat.id
     user = session.query(User).filter_by(chat_id=chat_id).first()
@@ -73,8 +99,14 @@ def phonebook_callback(call):
             phonebook(call.message)
             global_context[chat_id] = 'phonebook'
         elif call.data == "reminders":
-            events(call.message)
+            handle_events(call.message)
             global_context[chat_id] = 'events'
+        elif call.data == 'menu':
+            handle_start(call.message)
+            global_context[chat_id] = 'menu'
+        elif call.data == 'help':
+            help(call.message)
+            global_context[chat_id] = 'help'
         else:
             bot.send_message(chat_id, "Непередбачений стан. Почніть з команди /phonebook.")
     else:
@@ -145,6 +177,7 @@ def add_contact_number(message, contact_name):
         session.commit()
 
         bot.send_message(chat_id, f"Контакт {contact_name} доданий!")
+        phonebook(message)
     else:
         bot.send_message(chat_id, "Ви не авторизовані. Будь ласка, введіть логін.")
 
@@ -170,7 +203,7 @@ def delete_contact(message):
         bot.send_message(chat_id, "Ви не авторизовані. Будь ласка, введіть логін.")
 
 # Обробник Inline-кнопок для видалення контакту
-@bot.callback_query_handler(func=lambda call: True)
+@bot.callback_query_handler(func=lambda call: call.data.isdigit())
 def delete_contact_callback(call):
     chat_id = call.message.chat.id
     user = session.query(User).filter_by(chat_id=chat_id).first()
@@ -181,8 +214,10 @@ def delete_contact_callback(call):
 
         if contact in user.contacts:
             user.contacts.remove(contact)
+            session.delete(contact)
             session.commit()
             bot.send_message(chat_id, f"Контакт {contact.name} видалено!")
+            phonebook(call)
         else:
             bot.send_message(chat_id, "Цей контакт не належить вам.")
     else:
@@ -199,6 +234,8 @@ def list_contacts(message):
         if contacts:
             contact_list = "\n".join([f"{contact.name}: {contact.phone_number}" for contact in contacts])
             bot.send_message(chat_id, f"Ваші контакти:\n{contact_list}")
+            # Встановлення поточного стану в глобальному контексті
+            global_context[chat_id] = "list_contacts"
         else:
             bot.send_message(chat_id, "У вас немає контактів.")
     else:
@@ -229,7 +266,7 @@ def phonebook_callback(call):
 
 # Команда /events
 @bot.message_handler(commands=['events'])
-def events(message):
+def handle_events(message):
     chat_id = message.chat.id
     user = session.query(User).filter_by(chat_id=chat_id).first()
 
@@ -250,7 +287,7 @@ def events(message):
         menu = types.InlineKeyboardButton(
             'Меню', callback_data='menu', switch_inline_query=True
         )
-        markup.add(create_event, check_events, change_event, delete_event)
+        markup.add(create_event, check_events, change_event, delete_event, menu)
         bot.send_message(chat_id, "Ви в розділ нагадувань.", reply_markup=markup)
         global_context[chat_id] = 'events'
     else:
@@ -294,7 +331,7 @@ def enter_event_time(message, user, event_title, event_description):
         session.commit()
 
         bot.send_message(chat_id, f"Подія {event_title} створена на {event_time}.")
-
+        handle_events(message)
     except ValueError:
         bot.send_message(chat_id, "Неправильний формат часу. Спробуйте ще раз.")
 
@@ -310,6 +347,7 @@ def check_events(message):
         if events:
             event_list = "\n".join([f"{event.title} ({event.event_time})" for event in events])
             bot.send_message(chat_id, f"Ваші події:\n{event_list}")
+            global_context[chat_id] = 'check_events'
         else:
             bot.send_message(chat_id, "У вас немає подій.")
     else:
@@ -336,7 +374,7 @@ def change_event(message):
         bot.send_message(chat_id, "Ви не авторизовані. Будь ласка, введіть логін.")
 
 # Обробник Inline-кнопок для зміни події
-@bot.callback_query_handler(func=lambda call: call.data.startswith('change'))
+@bot.callback_query_handler(func=lambda call: call.data.isdigit())
 def change_event_callback(call):
     chat_id = call.message.chat.id
     user = session.query(User).filter_by(chat_id=chat_id).first()
@@ -365,6 +403,7 @@ def change_event_time(message, user, event):
         session.commit()
 
         bot.send_message(chat_id, f"Час події {event.title} змінено на {new_event_time}.")
+        handle_events(message)
 
     except ValueError:
         bot.send_message(chat_id, "Неправильний формат часу. Спробуйте ще раз.")
@@ -392,7 +431,7 @@ def delete_event(message):
 
 
 # Обробник Inline-кнопок для видалення події
-@bot.callback_query_handler(func=lambda call: call.data.startswith('delete'))
+@bot.callback_query_handler(func=lambda call: call.data.isdigit())
 def delete_event_callback(call):
     chat_id = call.message.chat.id
     user = session.query(User).filter_by(chat_id=chat_id).first()
@@ -405,12 +444,13 @@ def delete_event_callback(call):
             session.delete(event)
             session.commit()
             bot.send_message(chat_id, f"Подію {event.title} видалено.")
+            handle_events(call)
         else:
             bot.send_message(chat_id, "Ця подія не належить вам.")
     else:
         bot.send_message(chat_id, "Ви не авторизовані. Будь ласка, введіть логін.")
 
-@bot.callback_query_handler(func=lambda call: call.data in {'create', 'check', 'change_event', 'delete_event'})
+@bot.callback_query_handler(func=lambda call: call.data in {'create', 'check', 'change_event', 'delete_event', 'menu'})
 def events_callback(call):
     chat_id = call.message.chat.id
     user = session.query(User).filter_by(chat_id=chat_id).first()
@@ -427,6 +467,7 @@ def events_callback(call):
             elif call.data == 'delete_event':
                 delete_event(call.message)
             elif call.data == 'menu':
+                handle_start(call.message)
                 global_context[chat_id] = 'menu'
         else:
             bot.send_message(chat_id , "Непередбачений стан. Почніть з команди /events.")
@@ -435,10 +476,21 @@ def events_callback(call):
 
 
 # Обробник не визначених команд
-@bot.message_handler(func=lambda message: True, content_types=[])
+@bot.message_handler(func=lambda message: True)
 def handle_unknown(message):
-    bot.send_message(message.chat.id, "Я не розумію цю команду. Спробуйте ще раз або скористайтеся іншими командами.")
+    markup = types.InlineKeyboardMarkup(row_width=1)
+    help_hand = types.InlineKeyboardButton(
+        'Help', callback_data='help', switch_inline_query=True
+    )
 
+    markup.add(help_hand)
+
+    file = open('static/menu', 'r', encoding='utf-8')
+    txt = file.read()
+
+    bot.send_message(message.chat.id,
+                     "Я не розумію цю команду. Спробуйте ще раз або скористайтеся іншими командами.",
+                     reply_markup=markup)
 
 # Обробник введення логіну
 @bot.message_handler(func=lambda message: True)
@@ -460,4 +512,5 @@ def handle_login(message):
 
 
 if __name__ == "__main__":
-    bot.polling(none_stop=True)
+    while True:
+        bot.polling(none_stop=True)
