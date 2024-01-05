@@ -1,3 +1,4 @@
+import threading
 from datetime import datetime
 
 import telebot
@@ -37,14 +38,14 @@ def handle_start(message):
         phone_book = types.InlineKeyboardButton(
             'Ваша телефонная книга', callback_data='phone_book', switch_inline_query=True
         )
-        add_reminder = types.InlineKeyboardButton(
+        reminder = types.InlineKeyboardButton(
             'Напоминания', callback_data='reminders', switch_inline_query=True
         )
         help_hand = types.InlineKeyboardButton(
             'Help', callback_data='help', switch_inline_query=True
         )
 
-        markup.add(phone_book, add_reminder, help_hand)
+        markup.add(phone_book, reminder, help_hand)
 
         file = open('static/menu', 'r', encoding='utf-8')
         txt = file.read()
@@ -52,7 +53,7 @@ def handle_start(message):
         with open('static/logo.png', 'rb') as photo:
             bot.send_photo(message.chat.id, photo, txt, reply_markup=markup)
 
-        global_context[chat_id] = 'menu'
+        global_context[chat_id] = 'menu', 'start'
 
 @bot.message_handler(commands=['stop'])
 def stop(call):
@@ -326,14 +327,28 @@ def enter_event_time(message, user, event_title, event_description):
 
     try:
         event_time = datetime.strptime(event_time_str, '%d:%m:%Y %H:%M')
+        now = datetime.datetime.now()
+        delta = event_time - now
         new_event = Event(title=event_title, description=event_description, event_time=event_time, user=user)
         session.add(new_event)
         session.commit()
 
-        bot.send_message(chat_id, f"Подія {event_title} створена на {event_time}.")
-        handle_events(message)
+        if delta.total_seconds() <= 0:
+            bot.send_message(message.chat.id, 'Ви ввели минулу дату, спройту ще раз!')
+        else:
+            event_title = User[message.chat.id][event_title]
+            bot.send_message(chat_id, f"Подія {event_title} створена на {event_time}.")
+            reminder_time = threading.Timer(delta.total_seconds(), send_reminder(), [message.chat.id, event_title])
+            reminder_time.start()
+            handle_events(message)
     except ValueError:
         bot.send_message(chat_id, "Неправильний формат часу. Спробуйте ще раз.")
+
+def send_reminder(message, events_title):
+    chat_id = message.chat.id
+    user = session.query(User).filter_by(chat_id=chat_id).first()
+    if user:
+        bot.send_message(chat_id, 'Время получить ваше напоминание "{}"!'.format(events_title))
 
 
 # Команда /check_events
@@ -476,7 +491,7 @@ def events_callback(call):
 
 
 # Обробник не визначених команд
-@bot.message_handler(func=lambda message: True, content_types=[])
+@bot.message_handler(func=lambda message: True, content_types=[''])
 def handle_unknown(message):
     markup = types.InlineKeyboardMarkup(row_width=1)
     help_hand = types.InlineKeyboardButton(
@@ -514,4 +529,4 @@ def handle_login(message):
 
 if __name__ == "__main__":
     while True:
-        bot.polling(none_stop=True)
+        bot.polling(none_stop=True, interval=0)
