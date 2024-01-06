@@ -317,8 +317,9 @@ def enter_event_title(message, user):
 def enter_event_description(message, user, event_title):
     chat_id = message.chat.id
     event_description = message.text
-    bot.send_message(chat_id, "Введіть час події у форматі %DD:%MM:%YYYY %HH:%MM:")
+    bot.send_message(chat_id, "Введіть час події у форматі %d.%m.%Y %H:%M:")
     bot.register_next_step_handler(message, enter_event_time, user, event_title, event_description)
+
 
 
 def enter_event_time(message, user, event_title, event_description):
@@ -326,8 +327,8 @@ def enter_event_time(message, user, event_title, event_description):
     event_time_str = message.text
 
     try:
-        event_time = datetime.strptime(event_time_str, '%d:%m:%Y %H:%M')
-        now = datetime.datetime.now()
+        event_time = datetime.strptime(event_time_str, '%d.%m.%Y %H:%M')
+        now = datetime.now()
         delta = event_time - now
         new_event = Event(title=event_title, description=event_description, event_time=event_time, user=user)
         session.add(new_event)
@@ -336,20 +337,25 @@ def enter_event_time(message, user, event_title, event_description):
         if delta.total_seconds() <= 0:
             bot.send_message(message.chat.id, 'Ви ввели минулу дату, спройту ще раз!')
         else:
-            event_title = User[message.chat.id][event_title]
+            event = session.query(Event.title).filter_by(title=event_title).first()
             bot.send_message(chat_id, f"Подія {event_title} створена на {event_time}.")
-            reminder_time = threading.Timer(delta.total_seconds(), send_reminder(), [message.chat.id, event_title])
+            reminder_time = threading.Timer(delta.total_seconds(), send_reminder, [message.chat.id, event_title])
             reminder_time.start()
             handle_events(message)
     except ValueError:
         bot.send_message(chat_id, "Неправильний формат часу. Спробуйте ще раз.")
 
-def send_reminder(message, events_title):
-    chat_id = message.chat.id
+def send_reminder(chat_id, event_title):
     user = session.query(User).filter_by(chat_id=chat_id).first()
     if user:
-        bot.send_message(chat_id, 'Время получить ваше напоминание "{}"!'.format(events_title))
-
+        event = session.query(Event).filter_by(user_id=user.id, title=event_title).first()
+        if event:
+            event_time = event.event_time
+            formatted_time = event_time.strftime('%d.%m.%Y %H:%M')
+            message_text = f'Привіт! Не забули, що просили мене зараз нагадати Вам "{event_title}"!\nЧас події: {formatted_time}'
+            bot.send_message(chat_id, message_text)
+            session.delete(event)
+            session.commit()
 
 # Команда /check_events
 @bot.message_handler(commands=['check_events'])
@@ -529,4 +535,4 @@ def handle_login(message):
 
 if __name__ == "__main__":
     while True:
-        bot.polling(none_stop=True, interval=0)
+        bot.polling(none_stop=True)
