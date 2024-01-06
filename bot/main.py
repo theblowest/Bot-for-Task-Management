@@ -218,7 +218,7 @@ def delete_contact_callback(call):
             session.delete(contact)
             session.commit()
             bot.send_message(chat_id, f"Контакт {contact.name} видалено!")
-            phonebook(call)
+            phonebook(call.message)
         else:
             bot.send_message(chat_id, "Цей контакт не належить вам.")
     else:
@@ -535,4 +535,4 @@ def handle_login(message):
 
 if __name__ == "__main__":
     while True:
-        bot.polling(none_stop=True, interval=60)
+        bot.polling(none_stop=True)
