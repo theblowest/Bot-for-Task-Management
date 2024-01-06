@@ -36,10 +36,10 @@ def handle_start(message):
             bot.send_message(message.chat.id, f"Привіт, {user.username}!")
         markup = types.InlineKeyboardMarkup(row_width=1)
         phone_book = types.InlineKeyboardButton(
-            'Ваша телефонная книга', callback_data='phone_book', switch_inline_query=True
+            'Ваша телефонна книга', callback_data='phone_book', switch_inline_query=True
         )
         reminder = types.InlineKeyboardButton(
-            'Напоминания', callback_data='reminders', switch_inline_query=True
+            'Нагадування', callback_data='reminders', switch_inline_query=True
         )
         help_hand = types.InlineKeyboardButton(
             'Help', callback_data='help', switch_inline_query=True
@@ -123,13 +123,13 @@ def phonebook(message):
     if user:
         markup = types.InlineKeyboardMarkup(row_width=1)
         list_contacts = types.InlineKeyboardButton(
-            'Ваша телефонная книга', callback_data='list', switch_inline_query=True,
+            'Ваша телефонна книга', callback_data='list', switch_inline_query=True,
         )
         add_contact = types.InlineKeyboardButton(
-            'Добавить контакт', callback_data='add', switch_inline_query=True
+            'Додати контакт', callback_data='add', switch_inline_query=True
         )
         delete_contact = types.InlineKeyboardButton(
-            'Удалить контакт', callback_data='delete', switch_inline_query=True
+            'Видалити контакт', callback_data='delete', switch_inline_query=True
         )
         menu = types.InlineKeyboardButton(
             'Меню', callback_data='menu', switch_inline_query=True
@@ -197,7 +197,7 @@ def delete_contact(message):
                 button = InlineKeyboardButton(text=contact.name, callback_data=str(contact.id))
                 keyboard.add(button)
 
-            bot.send_message(chat_id, "Виберіть контакт для видалення:", reply_markup=keyboard)
+            bot.send_message(chat_id, "Оберіть контакт для видалення:", reply_markup=keyboard)
         else:
             bot.send_message(chat_id, "У вас немає контактів.")
     else:
@@ -289,7 +289,7 @@ def handle_events(message):
             'Меню', callback_data='menu', switch_inline_query=True
         )
         markup.add(create_event, check_events, change_event, delete_event, menu)
-        bot.send_message(chat_id, "Ви в розділ нагадувань.", reply_markup=markup)
+        bot.send_message(chat_id, "Ви в розділі нагадувань.", reply_markup=markup)
         global_context[chat_id] = 'events'
     else:
         bot.send_message(chat_id, "Ви не авторизовані. Будь ласка, введіть логін.")
@@ -352,7 +352,7 @@ def send_reminder(chat_id, event_title):
         if event:
             event_time = event.event_time
             formatted_time = event_time.strftime('%d.%m.%Y %H:%M')
-            message_text = f'Привіт! Не забули, що просили мене зараз нагадати Вам "{event_title}"!\nЧас події: {formatted_time}'
+            message_text = f'Привіт! Не забули, що просили мене нагадати Вам "{event_title}"!\nЧас події: {formatted_time}'
             bot.send_message(chat_id, message_text)
             session.delete(event)
             session.commit()
@@ -535,4 +535,4 @@ def handle_login(message):
 
 if __name__ == "__main__":
     while True:
-        bot.polling(none_stop=True)
+        bot.polling(none_stop=True, interval=60)
