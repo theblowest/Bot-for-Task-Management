@@ -25,7 +25,7 @@ global_context = {}
 # Команда /start
 @bot.message_handler(commands=['start', 'menu'])
 def handle_start(message):
-    print('+user')
+    print('+start')
     # Перевірка, чи користувач вже зареєстрований
     user = session.query(User).filter_by(chat_id=message.chat.id).first()
     chat_id = message.chat.id
@@ -211,7 +211,7 @@ def delete_contact_callback(call):
 
     if user:
         contact_id = int(call.data)
-        contact = session.query(Contact).get(contact_id)
+        contact = session.query(Contact).filter_by(id=contact_id).first()
 
         if contact in user.contacts:
             user.contacts.remove(contact)
@@ -221,6 +221,7 @@ def delete_contact_callback(call):
             phonebook(call.message)
         else:
             bot.send_message(chat_id, "Цей контакт не належить вам.")
+            phonebook(call.message)
     else:
         bot.send_message(chat_id, "Ви не авторизовані. Будь ласка, введіть логін.")
 
@@ -237,13 +238,15 @@ def list_contacts(message):
             bot.send_message(chat_id, f"Ваші контакти:\n{contact_list}")
             # Встановлення поточного стану в глобальному контексті
             global_context[chat_id] = "list_contacts"
+            phonebook(message)
         else:
             bot.send_message(chat_id, "У вас немає контактів.")
+            phonebook(message)
     else:
         bot.send_message(chat_id, "Ви не авторизовані. Будь ласка, введіть логін.")
 
 # Обробник для команди /phonebook
-@bot.callback_query_handler(func=lambda call: call.data in {'list', 'add', 'delete'})
+@bot.callback_query_handler(func=lambda call: call.data in {'list', 'add', 'delete', 'menu'})
 def phonebook_callback(call):
     chat_id = call.message.chat.id
     user = session.query(User).filter_by(chat_id=chat_id).first()
@@ -258,6 +261,7 @@ def phonebook_callback(call):
             elif call.data == 'delete':
                 delete_contact(call.message)
             elif call.data == 'menu':
+                handle_start(call.message)
                 global_context[chat_id] = 'menu'
         else:
             bot.send_message(chat_id, "Непередбачений стан. Почніть з команди /phonebook.")
@@ -344,6 +348,7 @@ def enter_event_time(message, user, event_title, event_description):
             handle_events(message)
     except ValueError:
         bot.send_message(chat_id, "Неправильний формат часу. Спробуйте ще раз.")
+        create_event(message)
 
 def send_reminder(chat_id, event_title):
     user = session.query(User).filter_by(chat_id=chat_id).first()
@@ -357,6 +362,7 @@ def send_reminder(chat_id, event_title):
             session.delete(event)
             session.commit()
 
+
 # Команда /check_events
 @bot.message_handler(commands=['check_events'])
 def check_events(message):
@@ -369,8 +375,10 @@ def check_events(message):
             event_list = "\n".join([f"{event.title} ({event.event_time})" for event in events])
             bot.send_message(chat_id, f"Ваші події:\n{event_list}")
             global_context[chat_id] = 'check_events'
+            handle_events(message)
         else:
             bot.send_message(chat_id, "У вас немає подій.")
+            handle_events(message)
     else:
         bot.send_message(chat_id, "Ви не авторизовані. Будь ласка, введіть логін.")
 
@@ -391,6 +399,7 @@ def change_event(message):
             bot.send_message(chat_id, "Виберіть подію для зміни:", reply_markup=keyboard)
         else:
             bot.send_message(chat_id, "У вас немає подій.")
+            handle_events(message)
     else:
         bot.send_message(chat_id, "Ви не авторизовані. Будь ласка, введіть логін.")
 
@@ -411,8 +420,10 @@ def change_event_callback(call):
             bot.register_next_step_handler(call.message, change_event_time, user, event)
         else:
             bot.send_message(chat_id, "Ця подія не належить вам.")
+            handle_events(call.message)
     else:
         bot.send_message(chat_id, "Ви не авторизовані. Будь ласка, введіть логін.")
+        handle_events(call.message)
 
 def change_event_time(message, user, event):
     chat_id = message.chat.id
@@ -428,6 +439,7 @@ def change_event_time(message, user, event):
 
     except ValueError:
         bot.send_message(chat_id, "Неправильний формат часу. Спробуйте ще раз.")
+        handle_events(message)
 
 
 # Команда /delete_event
@@ -447,27 +459,32 @@ def delete_event(message):
             bot.send_message(chat_id, "Виберіть подію для видалення:", reply_markup=keyboard)
         else:
             bot.send_message(chat_id, "У вас немає подій.")
+            handle_events(message)
     else:
         bot.send_message(chat_id, "Ви не авторизовані. Будь ласка, введіть логін.")
 
 
 # Обробник Inline-кнопок для видалення події
-@bot.callback_query_handler(func=lambda call: call.data.isdigit())
+@bot.callback_query_handler(func=lambda call: call.data.startswith('delete_') and call.data[7:].isdigit())
 def delete_event_callback(call):
     chat_id = call.message.chat.id
     user = session.query(User).filter_by(chat_id=chat_id).first()
 
     if user:
-        event_id = int(call.data.split('_')[1])
-        event = session.query(Event).get(event_id)
+        event_id = int(call.data[7:])
+        event = session.query(Event).filter_by(id=event_id, user_id=user.id).first()
+        user_events = session.query(Event.user_events).filter_by(id=event_id, user_id=user.id).first()
 
-        if event in user.events:
+        if event:
+            user_events.delete(event_id)
+            user.events.remove(event)
             session.delete(event)
             session.commit()
             bot.send_message(chat_id, f"Подію {event.title} видалено.")
-            handle_events(call)
+            handle_events(call.message)
         else:
             bot.send_message(chat_id, "Ця подія не належить вам.")
+            handle_events(call.message)
     else:
         bot.send_message(chat_id, "Ви не авторизовані. Будь ласка, введіть логін.")
 
@@ -529,6 +546,7 @@ def handle_login(message):
         # Авторизація
         if message.text == user.username:
             bot.send_message(chat_id, f"Ви авторизовані, {user.username}!")
+            handle_start(message)
         else:
             bot.send_message(chat_id, "Неправильний логін. Спробуйте ще раз.")
 
