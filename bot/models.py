@@ -4,6 +4,8 @@ from sqlalchemy import create_engine, Column, Integer, String, ForeignKey, Table
 from sqlalchemy.orm import relationship, sessionmaker
 from sqlalchemy.ext.declarative import declarative_base
 
+from bot.config import SQLALCHEMY_DATABASE_URI
+
 Base = declarative_base()
 
 # Модель користувача
@@ -48,7 +50,7 @@ class Event(Base):
                         Column('event_id', ForeignKey('events.id'), primary_key=True))
 
 
-engine = create_engine('sqlite:///bot.db')
+engine = create_engine(SQLALCHEMY_DATABASE_URI)
 Base.metadata.create_all(engine)
 
 Session = sessionmaker(bind=engine)

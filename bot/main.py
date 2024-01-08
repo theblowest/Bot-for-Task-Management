@@ -4,6 +4,7 @@ from datetime import datetime
 import telebot
 from telebot import types
 from sqlalchemy.orm import sessionmaker
+from sqlalchemy import delete, and_, text
 
 from telebot.types import InlineKeyboardMarkup, InlineKeyboardButton
 
@@ -340,6 +341,7 @@ def enter_event_time(message, user, event_title, event_description):
 
         if delta.total_seconds() <= 0:
             bot.send_message(message.chat.id, 'Ви ввели минулу дату, спройту ще раз!')
+            enter_event_description(message, user, event_title)
         else:
             event = session.query(Event.title).filter_by(title=event_title).first()
             bot.send_message(chat_id, f"Подія {event_title} створена на {event_time}.")
@@ -473,13 +475,9 @@ def delete_event_callback(call):
     if user:
         event_id = int(call.data[7:])
         event = session.query(Event).filter_by(id=event_id, user_id=user.id).first()
-        user_events = session.query(Event.user_events).filter_by(id=event_id, user_id=user.id).first()
-
         if event:
-            user_events.delete(event_id)
-            user.events.remove(event)
             session.delete(event)
-            session.commit()
+            session.query(Event.user_events).filter_by(user_id=user.id, event_id=event_id).delete()
             bot.send_message(chat_id, f"Подію {event.title} видалено.")
             handle_events(call.message)
         else:

@@ -1,3 +1,8 @@
-TOKEN = '6326228044:AAEBmLgzlhioqfc6F8YlP7N2BP6nb9RqM8Q'
-DEBUG = True
-SQLALCHEMY_DATABASE_URI = 'sqlite:///bot.db'
+from dotenv import load_dotenv
+import os
+
+load_dotenv()
+
+TOKEN = os.environ.get("TOKEN")
+DEBUG = os.environ.get("DEBUG")
+SQLALCHEMY_DATABASE_URI = os.environ.get("SQLALCHEMY_DATABASE_URI")
